@@ -1,7 +1,7 @@
 /***************************************************************************************************
 PopupWindow - The ultimate popup/dialog/modal jQuery plugin
     Author          : Gaspare Sganga
-    Version         : 1.0.0
+    Version         : 1.0.1
     License         : MIT
     Documentation   : http://gasparesganga.com/labs/jquery-popup-window/
 ***************************************************************************************************/
@@ -91,6 +91,7 @@ PopupWindow - The ultimate popup/dialog/modal jQuery plugin
         },
         titlebar : {
             "box-sizing"        : "border-box",
+            "flex"              : "0 0 auto",
             "display"           : "flex",
             "align-items"       : "center"
         },
@@ -103,6 +104,7 @@ PopupWindow - The ultimate popup/dialog/modal jQuery plugin
         },
         titlebar_button : {
             "box-sizing"        : "border-box",
+            "flex"              : "0 0 auto",
             "display"           : "flex"
         },
         content : {
@@ -111,6 +113,7 @@ PopupWindow - The ultimate popup/dialog/modal jQuery plugin
         },
         statusbar : {
             "box-sizing"        : "border-box",
+            "flex"              : "0 0 auto",
             "display"           : "flex",
             "align-items"       : "flex-end"
         },
@@ -124,7 +127,9 @@ PopupWindow - The ultimate popup/dialog/modal jQuery plugin
         },
         statusbar_handle : {
             "box-sizing"        : "border-box",
-            "display"           : "flex",
+            "display"           : "flex"
+        },
+        statusbar_handle_resizable : {
             "cursor"            : "se-resize"
         },
         resizer_top : {
@@ -457,6 +462,7 @@ PopupWindow - The ultimate popup/dialog/modal jQuery plugin
             .appendTo(statusBar);
             if (settings.resizable) {
                 resizeHandle
+                    .css(_css.statusbar_handle_resizable)
                     .append(_icons.resizeHandle)
                     .on("mousedown", null, {
                         dimension   : "both",
