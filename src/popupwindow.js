@@ -1,7 +1,7 @@
 /***************************************************************************************************
 PopupWindow - The ultimate popup/dialog/modal jQuery plugin
     Author          : Gaspare Sganga
-    Version         : 1.0.1
+    Version         : 1.0.2
     License         : MIT
     Documentation   : http://gasparesganga.com/labs/jquery-popup-window/
 ***************************************************************************************************/
@@ -307,7 +307,10 @@ PopupWindow - The ultimate popup/dialog/modal jQuery plugin
     //  FUNCTIONS
     // **************************************************
     function _Init(originalTarget, options){
-        if (originalTarget.closest(".popupwindow").length) return;
+        if (originalTarget.closest(".popupwindow").length) {
+            _Warning("jQuery PopupWindow is already initialized on this element");
+            return;
+        }
         var settings = $.extend(true, {}, _defaults, options);
         settings.animationTime  = parseInt(settings.animationTime, 10);
         settings.height         = parseInt(settings.height, 10);
@@ -608,7 +611,7 @@ PopupWindow - The ultimate popup/dialog/modal jQuery plugin
     }
     
     function _Open(popupWindow){
-        if (!popupWindow.length || popupWindow.data("opened")) return;
+        if (!_CheckPopupWindow(popupWindow) || popupWindow.data("opened")) return;
         popupWindow.data("overlay").show();
         popupWindow.data("opened", true);
         _TriggerEvent(popupWindow, "open");
@@ -616,7 +619,7 @@ PopupWindow - The ultimate popup/dialog/modal jQuery plugin
         _Unminimize(popupWindow)
     }
     function _Close(popupWindow){
-        if (!popupWindow.length || !popupWindow.data("opened")) return;
+        if (!_CheckPopupWindow(popupWindow) || !popupWindow.data("opened")) return;
         if (popupWindow.data("minimized")) _Unminimize(popupWindow);
         popupWindow.data("overlay").hide();
         popupWindow.data("opened", false);
@@ -624,7 +627,7 @@ PopupWindow - The ultimate popup/dialog/modal jQuery plugin
     }
     
     function _Maximize(popupWindow){
-        if (!popupWindow.length || !popupWindow.data("opened") || popupWindow.data("maximized") || popupWindow.data("collapsed") || popupWindow.data("minimized")) return;
+        if (!_CheckPopupWindow(popupWindow) || !popupWindow.data("opened") || popupWindow.data("maximized") || popupWindow.data("collapsed") || popupWindow.data("minimized")) return;
         var settings = popupWindow.data("settings");
         
         popupWindow.find(".popupwindow_titlebar_button_maximize")
@@ -652,7 +655,7 @@ PopupWindow - The ultimate popup/dialog/modal jQuery plugin
         });
     }
     function _Unmaximize(popupWindow){
-        if (!popupWindow.length || !popupWindow.data("opened") || !popupWindow.data("maximized")) return;
+        if (!_CheckPopupWindow(popupWindow) || !popupWindow.data("opened") || !popupWindow.data("maximized")) return;
         var settings    = popupWindow.data("settings");
         var defPosition = _RestoreSavedPosition(popupWindow);
         var defSize     = _RestoreSavedSize(popupWindow);
@@ -672,7 +675,7 @@ PopupWindow - The ultimate popup/dialog/modal jQuery plugin
     }
     
     function _Collapse(popupWindow){
-        if (!popupWindow.length || !popupWindow.data("opened") || popupWindow.data("maximized") || popupWindow.data("collapsed") || popupWindow.data("minimized")) return;
+        if (!_CheckPopupWindow(popupWindow) || !popupWindow.data("opened") || popupWindow.data("maximized") || popupWindow.data("collapsed") || popupWindow.data("minimized")) return;
         var settings = popupWindow.data("settings");
         
         popupWindow.find(".popupwindow_titlebar_button_collapse")
@@ -693,7 +696,7 @@ PopupWindow - The ultimate popup/dialog/modal jQuery plugin
         });
     }
     function _Uncollapse(popupWindow){
-        if (!popupWindow.length || !popupWindow.data("opened") || !popupWindow.data("collapsed")) return;
+        if (!_CheckPopupWindow(popupWindow) || !popupWindow.data("opened") || !popupWindow.data("collapsed")) return;
         var settings    = popupWindow.data("settings");
         var defSize     = _RestoreSavedSize(popupWindow);
         
@@ -710,7 +713,7 @@ PopupWindow - The ultimate popup/dialog/modal jQuery plugin
     }
     
     function _Minimize(popupWindow){
-        if (!popupWindow.length || !popupWindow.data("opened") || popupWindow.data("collapsed") || popupWindow.data("minimized")) return;
+        if (!_CheckPopupWindow(popupWindow) || !popupWindow.data("opened") || popupWindow.data("collapsed") || popupWindow.data("minimized")) return;
         var defRet      = $.Deferred();
         var settings    = popupWindow.data("settings");
         var defUnmaximize;
@@ -773,7 +776,7 @@ PopupWindow - The ultimate popup/dialog/modal jQuery plugin
         return defRet.promise();
     }
     function _Unminimize(popupWindow){
-        if (!popupWindow.length || !popupWindow.data("opened") || !popupWindow.data("minimized")) return;
+        if (!_CheckPopupWindow(popupWindow) || !popupWindow.data("opened") || !popupWindow.data("minimized")) return;
         var settings        = popupWindow.data("settings");
         var minPlaceholder  = popupWindow.data("minPlaceholder");
         
@@ -820,7 +823,7 @@ PopupWindow - The ultimate popup/dialog/modal jQuery plugin
     }
     
     function _Destroy(popupWindow){
-        if (!popupWindow.length) return;
+        if (!_CheckPopupWindow(popupWindow)) return;
         var originalTarget = popupWindow.data("originalTarget");
         originalTarget.appendTo(popupWindow.data("originalParent"));
         if (popupWindow.data("minimized")) {
@@ -832,11 +835,10 @@ PopupWindow - The ultimate popup/dialog/modal jQuery plugin
     }
     
     function _GetCurrentPosition(popupWindow){
-        if (!popupWindow.length) return undefined;
+        if (!_CheckPopupWindow(popupWindow)) return undefined;
         return $.extend({}, popupWindow.data("currentPosition"));
     }
     function _SetCurrentPosition(popupWindow, position){
-        if (!popupWindow.length) return undefined;
         $.extend(popupWindow.data("currentPosition"), position);
     }
     function _SaveCurrentPosition(popupWindow){
@@ -846,7 +848,7 @@ PopupWindow - The ultimate popup/dialog/modal jQuery plugin
         return _ChangePosition(popupWindow, popupWindow.data("savedPosition"));
     }
     function _ChangePosition(popupWindow, params){
-        if (!popupWindow.length) return;
+        if (!_CheckPopupWindow(popupWindow)) return;
         var defRet          = $.Deferred();
         var settings        = popupWindow.data("settings");
         var animationTime   = (params.animationTime !== undefined) ? parseInt(params.animationTime) : settings.animationTime;
@@ -890,11 +892,10 @@ PopupWindow - The ultimate popup/dialog/modal jQuery plugin
     }
     
     function _GetCurrentSize(popupWindow){
-        if (!popupWindow.length) return undefined;
+        if (!_CheckPopupWindow(popupWindow)) return undefined;
         return $.extend({}, popupWindow.data("currentSize"));
     }
     function _SetCurrentSize(popupWindow, size){
-        if (!popupWindow.length) return undefined;
         $.extend(popupWindow.data("currentSize"), size);
     }
     function _SaveCurrentSize(popupWindow){
@@ -908,7 +909,7 @@ PopupWindow - The ultimate popup/dialog/modal jQuery plugin
         }, popupWindow.data("savedSize")));
     }
     function _ChangeSize(popupWindow, params){
-        if (!popupWindow.length) return;
+        if (!_CheckPopupWindow(popupWindow)) return;
         var defRet          = $.Deferred();
         var settings        = popupWindow.data("settings");
         var animationTime   = (params.animationTime !== undefined) ? parseInt(params.animationTime) : settings.animationTime;
@@ -962,7 +963,7 @@ PopupWindow - The ultimate popup/dialog/modal jQuery plugin
         return "normal";
     }
     function _SetState(popupWindow, state){
-        if (!popupWindow.length) return;
+        if (!_CheckPopupWindow(popupWindow)) return;
         switch (state.toLowerCase()) {
             case "normal":
                 if (!popupWindow.data("opened"))    _Open(popupWindow);
@@ -995,12 +996,12 @@ PopupWindow - The ultimate popup/dialog/modal jQuery plugin
     }
     
     function _SetTitle(popupWindow, title){
-        if (!popupWindow.length) return;
+        if (!_CheckPopupWindow(popupWindow)) return;
         popupWindow.data("settings").title = title;
         popupWindow.find(".popupwindow_titlebar_text").text(title);
     }
     function _StatusBar(popupWindow, content){
-        if (!popupWindow.length) return;
+        if (!_CheckPopupWindow(popupWindow)) return;
         popupWindow.find(".popupwindow_statusbar_content").html(content);
     }
     
@@ -1042,6 +1043,22 @@ PopupWindow - The ultimate popup/dialog/modal jQuery plugin
             flex["flex-wrap"]       = (_minimizedArea.position.indexOf("left") >= 0) ? "wrap" : "wrap-reverse";
         }
         _mainContainer.css(flex);
+    }
+    
+    
+    function _CheckPopupWindow(popupWindow){
+        if (popupWindow.length) return true;
+        _Warning("jQuery PopupWindow is not initialized on this element");
+        return false;
+    }
+    
+    function _Warning(message){
+        message = "jQuery PopupWindow Warning: " + message;
+        if (window.console.warn) {
+            console.warn(message);
+        } else if (window.console.log) {
+            console.log(message);
+        }
     }
     
     
@@ -1176,7 +1193,8 @@ PopupWindow - The ultimate popup/dialog/modal jQuery plugin
         }
     }
     
-    $(document).ready(function(){
+    
+    $(function(){
         _mainContainer = $("<div>", {
             class   : "popupwindow_container"
         })
