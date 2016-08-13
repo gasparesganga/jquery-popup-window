@@ -1,7 +1,7 @@
 /***************************************************************************************************
 PopupWindow - The ultimate popup/dialog/modal jQuery plugin
     Author          : Gaspare Sganga
-    Version         : 1.0.2
+    Version         : 1.0.3
     License         : MIT
     Documentation   : http://gasparesganga.com/labs/jquery-popup-window/
 ***************************************************************************************************/
@@ -326,6 +326,7 @@ PopupWindow - The ultimate popup/dialog/modal jQuery plugin
         })
         .css(_css.overlay)
         .appendTo(_mainContainer);
+        if (settings.modal) overlay.css("pointer-events", "auto");
         
         // Minimized Placeholder
         var minPlaceholder = $("<div>", {
@@ -371,7 +372,7 @@ PopupWindow - The ultimate popup/dialog/modal jQuery plugin
         })
         .on("mousedown", ".popupwindow_titlebar_draggable", _Titlebar_MouseDown)
         .appendTo(overlay);
-                
+        
         // Titlebar
         var leftToRight = (settings.buttonsPosition.toLowerCase().indexOf("l") < 0);
         var titlebar = $("<div>", {
@@ -1202,7 +1203,7 @@ PopupWindow - The ultimate popup/dialog/modal jQuery plugin
         .appendTo("body");
         _SetMinimizedArea();
         
-        $(window).resize(function(){
+        $(window).on("resize", function(){
             $(document).find(".popupwindow").each(function(){
                 var popupWindow = $(this);
                 if (popupWindow.data("settings").keepInViewport) _CheckPosition(popupWindow);
