@@ -1,0 +1,32 @@
+{
+  "name": "jquery-popup-window",
+  "version": "1.0.4",
+  "description": "The ultimate popup/dialog/modal jQuery plugin",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "gulp build",
+    "major": "npm version major",
+    "minor": "npm version minor",
+    "patch": "npm version patch",
+    "npm-publish": "npm publish"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gasparesganga/jquery-popup-window.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/gasparesganga/jquery-popup-window/issues"
+  },
+  "homepage": "https://github.com/gasparesganga/jquery-popup-window#readme",
+  "devDependencies": {
+    "gulp": "^4.0.2",
+    "gulp-header": "^2.0.9",
+    "gulp-rename": "^1.4.0",
+    "gulp-uglify": "^3.0.2",
+    "gulp-uglifycss": "^1.1.0"
+  }
+}
