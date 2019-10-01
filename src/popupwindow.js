@@ -32,6 +32,7 @@ PopupWindow - The ultimate popup/dialog/modal jQuery plugin
         }, 
         
         draggable           : true,
+        nativeDrag          : true,
         dragOpacity         : 0.6,
         
         resizable           : true,
@@ -370,8 +371,20 @@ PopupWindow - The ultimate popup/dialog/modal jQuery plugin
             savedPosition       : undefined,
             savedSize           : undefined
         })
-        .on("mousedown", ".popupwindow_titlebar_draggable", _Titlebar_MouseDown)
         .appendTo(overlay);
+
+        if (settings.draggable) {
+            if (settings.nativeDrag) {
+                popupWindow
+                    .on("dragstart", _Native_Drag)
+                    .on("drag",  _Native_Drag)
+                    .on("dragend",  _Native_Drag)
+                    .on("mousedown", ".popupwindow_titlebar_draggable",  _Native_Drag_Handle);
+            } else {
+                popupWindow
+                    .on("mousedown", ".popupwindow_titlebar_draggable", _Titlebar_MouseDown);
+            }
+        }
         
         // Titlebar
         var leftToRight = (settings.buttonsPosition.toLowerCase().indexOf("l") < 0);
@@ -1192,6 +1205,62 @@ PopupWindow - The ultimate popup/dialog/modal jQuery plugin
             if (savedData.size.width != currentSize.width || savedData.size.height != currentSize.height)         _TriggerEvent(popupWindow, "resize");
             popupWindow.removeData("tempSavedData");
         }
+    }
+
+    function _Native_Drag(event) {
+        switch (event.type) {
+            case "dragstart":
+                event.originalEvent.dataTransfer.effectAllowed = "move";
+                var popupWindow = $(event.currentTarget).closest(".popupwindow");
+                var settings = popupWindow.data("settings");
+                var boundary = this.getBoundingClientRect();
+                popupWindow.data("adjust", { x: boundary.x - event.originalEvent.x, y: boundary.y - event.originalEvent.y });
+                popupWindow.css({"opacity": settings.dragOpacity});
+                break;
+            case "drag":
+                var popupWindow = $(event.currentTarget).closest(".popupwindow");
+                var settings = popupWindow.data("settings");
+                var adjust = popupWindow.data("adjust");
+                var newPosition = { top: event.originalEvent.y + adjust.y, left: event.originalEvent.x + adjust.x };
+                if (event.originalEvent.x && event.originalEvent.y) {
+                    var size = _GetCurrentSize(popupWindow);
+                    var $window = $(window);
+                    var outside = (newPosition.top < 0)
+                        || (newPosition.left < 0)
+                        || (newPosition.top > $window.height() - size.height)
+                        || (newPosition.left > $window.width() - size.width);
+                        
+                    popupWindow.css($.extend(newPosition, { visibility: outside ? "hidden" : "visible" }));
+                    popupWindow.data("coords", newPosition); 
+                }
+                break;
+            case "dragend":
+                event.preventDefault();
+                event.stopPropagation(); 
+                var popupWindow = $(event.currentTarget).closest(".popupwindow");
+                var settings = popupWindow.data("settings");
+                var adjust = popupWindow.data("adjust");
+                var newPosition = popupWindow.data("coords");
+                if (settings.keepInViewport) {
+                    var size = _GetCurrentSize(popupWindow);
+                    var $window = $(window);
+                    if (newPosition.top < 0) newPosition.top = 0;
+                    if (newPosition.left < 0) newPosition.left = 0;
+                    if (newPosition.top > $window.height() - size.height) newPosition.top = $window.height() - size.height;
+                    if (newPosition.left > $window.width() - size.width) newPosition.left = $window.width() - size.width;
+                }
+                popupWindow.css($.extend(newPosition, {"opacity": 1, visibility: "visible"}));
+                _SetCurrentPosition(popupWindow, newPosition);
+                if (settings.mouseMoveEvents) _TriggerEvent(popupWindow, "move");
+                break;
+            default:
+            // 
+        }
+        return true;
+    }
+
+    function _Native_Drag_Handle() {
+        $(this).parent().attr("draggable", "true");
     }
     
     
